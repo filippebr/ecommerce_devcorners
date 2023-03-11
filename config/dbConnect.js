@@ -1,5 +1,5 @@
 const { default: mongoose } = require("mongoose");
-const URL = process.env.URL_MONGODB;
+const URL = process.env.MONGODB_URL;
 
 const dbConnect = () => {
   try {

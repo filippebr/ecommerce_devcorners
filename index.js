@@ -1,3 +1,4 @@
+const bodyParser = require('body-parser')
 const express = require('express')
 const app = express()
 const dotenv = require('dotenv').config()
@@ -6,10 +7,8 @@ const dbConnect = require('./config/dbConnect')
 const authRoute = require('./routes/authRoute')
 dbConnect();
 
-app.use('/', (req, res) => {
-  res.send('Hello from server side')
-})
-
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/api/user', authRoute);
 
 app.listen(PORT, () => {
