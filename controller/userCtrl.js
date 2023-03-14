@@ -3,7 +3,7 @@ const asyncHandler = require('express-async-handler');
 const { generateToken } = require('../config/jwtToken');
 
 const createUser = asyncHandler(async (req, res) => {
-  const email = req.body.email
+  const { email } = req.body;
   const findUser = await User.findOne({ email });
   if (!findUser) {
     // Create a new User
