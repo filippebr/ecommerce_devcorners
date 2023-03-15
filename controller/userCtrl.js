@@ -10,7 +10,7 @@ const createUser = asyncHandler(async (req, res) => {
     const newUser = await User.create(req.body);
     res.json(newUser)
   } else {
-    throw new Error('User already exists')
+    res.status(409).json({ message: 'User already exists' });
   }
 });
 
@@ -28,7 +28,27 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
       token: generateToken(findUser?._id),
     });
   } else {
-    throw new Error("Invalid Credentials")
+    res.status(409).json({ message: 'Invalid Credentials' })
+  }
+})
+
+// Update a user
+const updateUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.findByIdAndUpdate(
+      id,
+      {
+        firstname: req?.body?.firstname,
+        lastname: req?.body?.lastname,
+        email: req?.body?.email,
+        mobile: req?.body?.mobile,
+      }, {
+      new: true,
+    });
+    res.json(user);
+  } catch (err) {
+    throw new Error(err);
   }
 })
 
@@ -44,7 +64,6 @@ const getAllUsers = asyncHandler(async (req, res) => {
 
 // Get a single user
 const getUser = asyncHandler(async (req, res) => {
-  console.log(req.params);
   const { id } = req.params;
   try {
     const user = await User.findById(id);
@@ -56,6 +75,7 @@ const getUser = asyncHandler(async (req, res) => {
   }
 });
 
+// Delete a User
 const deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
@@ -69,4 +89,4 @@ const deleteUser = asyncHandler(async (req, res) => {
 });
 
 
-module.exports = { createUser, loginUserCtrl, getAllUsers, getUser, deleteUser }; 
+module.exports = { createUser, loginUserCtrl, getAllUsers, getUser, deleteUser, updateUser }; 
