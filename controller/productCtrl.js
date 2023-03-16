@@ -11,5 +11,14 @@ const createProduct = asyncHandler(async (req, res) => {
   }  
 });
 
+const getProduct = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    const findProduct = await Product.findById(id);
+    res.json(findProduct);
+  } catch (err) {
+    throw new Error(err);
+  }
+});
 
-module.exports = { createProduct };
+module.exports = { createProduct, getProduct };
