@@ -46,8 +46,8 @@ var userSchema = new mongoose.Schema({
 });
 
 userSchema.pre('save', async function (next) {
-  const salt = await bcrypt.genSaltSync(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  const salt = bcrypt.genSaltSync(10);
+  this.password = bcrypt.hash(this.password, salt);
 });
 
 userSchema.methods.isPasswordMatched = async function (enteredPassword) {
