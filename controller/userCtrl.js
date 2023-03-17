@@ -23,7 +23,7 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
   // check if user exists or not
   const findUser = await User.findOne({ email });
   if (findUser && await findUser.isPasswordMatched(password)) {
-    const refreshToken = await generateRefreshToken(findUser?._id);
+    const refreshToken = generateRefreshToken(findUser?._id);
     const updateUser = await User.findByIdAndUpdate(
       findUser.id, 
       {
@@ -121,7 +121,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
     const getUsers = await User.find();
     res.json(getUsers);
   } catch (err) {
-    throw new Error(error);
+    throw new Error(err);
   }
 })
 
@@ -136,7 +136,7 @@ const getUser = asyncHandler(async (req, res) => {
       user,
     });
   } catch (err) {
-    throw new Error(error);
+    throw new Error(err);
   }
 });
 
