@@ -8,7 +8,10 @@ const { errorHandler, notFound } = require('./middlewares/errorHandler');
 const authRoute = require('./routes/authRoute');
 const productRouter = require('./routes/productRoute');
 const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
 dbConnect();
+
+app.use(morgan('dev'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
