@@ -1,14 +1,13 @@
 const nodemailer = require('nodemailer');
 const asyncHandler = require('express-async-handler');
 
+const { host, port, user, pass } = require('../config/mail.json');
+
 const sendEmail = asyncHandler(async(data, req, res) => {
   let transporter = nodemailer.createTransport({
-    host: "sandbox.smtp.mailtrap.io",
-    port: 2525,
-    auth: {
-      user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASS
-    }
+    host,
+    port,
+    auth: { user, pass }
   });
 
   // send mail with defined transport object
