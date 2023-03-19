@@ -6,8 +6,8 @@ const sendEmail = asyncHandler(async(data, req, res) => {
     host: "sandbox.smtp.mailtrap.io",
     port: 2525,
     auth: {
-      user: "07718e35c2827f",
-      pass: "6ae178dac95bb6"
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASS
     }
   });
 
