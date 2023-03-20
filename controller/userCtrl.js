@@ -5,6 +5,8 @@ const validateMongoDbId = require('../utils/validateMongodbId');
 const generateRefreshToken = require('../config/refreshToken');
 const jwt = require('jsonwebtoken');
 const sendEmail = require('./emailCtrl');
+const resetUrlTemplate = require('../utils/resetUrlTemplate');
+const crypto = require('crypto');
 
 // Create a users
 const createUser = asyncHandler(async (req, res) => {
@@ -213,14 +215,24 @@ const updatePassword = asyncHandler(async(req, res) => {
 const forgotPasswordToken = asyncHandler(async(req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
-  if ( !user ) throw new Error('User not found with this email');
+  if ( !user ) return res.status(400).send({ error: "User not found" });
   try {
-    const token = await user.createPasswordResetToken();
-    await user.save();
-    const resetURL = `Hi, Please follow this link to reset your password. This link is valid for 10 minutes from now. <a href='http://localhost:5000/api/user/resetPassword/${token}'>Click Here</a>`
+    const token = await crypto.randomBytes(20).toString('hex');
+
+    console.log("token: ", token);    
+
+    await User.findByIdAndUpdate(user.id, {
+      '$set': {
+        passwordResetToken: token,
+        passwordResetExpires: Date.now() + 30 * 60 * 1000,
+      }, 
+      
+    }, { new: true });
+
+    const resetURL = resetUrlTemplate(token);
     const data = {
       to: email,
-      text: "Hey User",
+      text: "Hey User. \n\nYou requested to change your password, if so.",
       subject: "Forgot Password Link",
       htm: resetURL,                  
     };
@@ -229,7 +241,37 @@ const forgotPasswordToken = asyncHandler(async(req, res) => {
   } catch (err) {
     throw new Error(err);
   }
-})
+});
+
+const resetPassword = asyncHandler(async(req, res) => {
+  const { email, password } = req.body;
+  const { token } = req.params;
+
+  try {
+    const user = await User.findOne({ email })
+      .select('+passwordResetToken passwordResetExpires');
+    
+    if (!user) 
+      return res.status(400).send({error: 'User not found'});
+
+    if (token !== user.passwordResetToken)
+      return res.status(400).send({ error: 'Token invalid'});
+
+    const now = new Date();
+
+    if (now > user.passwordResetExpires) 
+      return res.status(400).send({ error: 'Token expired, generate a new one'});
+
+    user.password = password;
+
+    await user.save();
+
+    res.json(user);
+      
+  } catch(err) {
+    res.status(400).send({ error: 'Cannot reset password, try again'});
+  }
+});
 
 module.exports = { 
   createUser, 
@@ -243,5 +285,6 @@ module.exports = {
   handleRefreshToken,
   logout,
   updatePassword,
-  forgotPasswordToken
+  forgotPasswordToken,
+  resetPassword
 }; 

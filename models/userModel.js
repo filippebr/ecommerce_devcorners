@@ -42,9 +42,18 @@ var userSchema = new mongoose.Schema({
   refreshToken: {
     type: String
   },
-  passwordChangedAt: Date,
-  passwordResetToken: String,
-  passwordResetExpires: Date,
+  passwordChangedAt: {
+    type: Date,
+    select: false,
+  },
+  passwordResetToken: {
+    type: String,
+    select: false,
+  },
+  passwordResetExpires: {
+    type: Date,
+    select: false,
+  }
 }, {
   timestamps: true,
 });
@@ -69,8 +78,10 @@ userSchema.methods.isPasswordMatched = async function (enteredPassword) {
 
 userSchema.methods.createPasswordResetToken = async function() {
   const resetToken = crypto.randomBytes(20).toString('hex');
+  
   this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
   this.passwordResetExpires = Date.now() + 30 * 60 * 1000; // 30 minutes
+  
   return resetToken;
 }
 
