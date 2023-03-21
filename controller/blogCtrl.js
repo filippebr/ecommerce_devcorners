@@ -14,8 +14,10 @@ const createBlog = asyncHandler(async(req, res) => {
 
 const updateBlog = asyncHandler(async(req, res) => {
   const { id } = req.params;
+  validateMongoDbId(id);
+
   try {
-    const blog = await Blog.findByIdAndUpdate(id, req.body, { 
+    const blog = await Blog.findByIdAndUpdate({ _id: id }, req.body, { 
       new: true 
     });
     res.json(blog);
@@ -26,9 +28,11 @@ const updateBlog = asyncHandler(async(req, res) => {
 
 const getBlog = asyncHandler(async(req, res) => {
   const { id } = req.params;
+  validateMongoDbId(id);
+
   try {
     const updateViews = await Blog.findByIdAndUpdate(
-      id, 
+      { _id: id }, 
       {
         $inc: {numViews: 1}
       }, 
@@ -60,7 +64,60 @@ const deleteBlog = asyncHandler(async(req, res) => {
   } catch (err) {
     throw new Error(err);
   }
+});
 
-})
+const likeBlog = asyncHandler(async(req, res) => {
+  const { blogId } = req.body;
+  validateMongoDbId(blogId);
 
-module.exports = { createBlog, updateBlog, getBlog, getAllBlogs, deleteBlog };
+  try {
+    // Find the blog which you want to be liked
+    const blog = await Blog.findById({ _id: blogId });
+    // find the login user 
+    const loginUserId = req?.user?._id;
+    // find if the user has liked the blog
+    const isLiked = blog?.isLiked;
+    // find if the user has disliked the blog
+    const alreadyDisliked = blog?.dislikes?.find(
+      (userId) => userId?.toString() === loginUserId?.toString()
+    );
+    if (alreadyDisliked) {
+      const blog = await Blog.findByIdAndUpdate(
+        { _id: blogId }, 
+        {
+          $pull: { dislikes: loginUserId },
+          isDisliked: false
+        }, 
+        { new: true}
+      );
+      res.json(blog);
+    }
+
+    if (isLiked) {
+      const blog = await Blog.findByIdAndUpdate(
+        { _id: blogId }, 
+        {
+          $pull: { likes: loginUserId },
+          isLiked: false
+        }, 
+        { new: true}
+      );
+      res.json(blog);
+    } else {
+      const blog = await Blog.findByIdAndUpdate(
+        { _id: blogId },
+        {
+          $push: { likes: loginUserId },
+          isLiked: true,
+        },
+        { new: true }
+      );
+      res.json(blog);
+    }
+
+  } catch (err) {
+    throw new Error(err);
+  }
+});
+
+module.exports = { createBlog, updateBlog, getBlog, getAllBlogs, deleteBlog, likeBlog };
