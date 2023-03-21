@@ -215,11 +215,9 @@ const updatePassword = asyncHandler(async(req, res) => {
 const forgotPasswordToken = asyncHandler(async(req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
-  if ( !user ) return res.status(400).send({ error: "User not found" });
   try {
+    if ( !user ) return res.status(400).send({ error: "User not found" });
     const token = await crypto.randomBytes(20).toString('hex');
-
-    console.log("token: ", token);    
 
     await User.findByIdAndUpdate(user.id, {
       '$set': {
