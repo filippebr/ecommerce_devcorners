@@ -49,4 +49,18 @@ const getAllBlogs = asyncHandler(async (req, res) => {
   }
 })
 
-module.exports = { createBlog, updateBlog, getBlog, getAllBlogs };
+const deleteBlog = asyncHandler(async(req, res) => {
+  const { id } = req.params;
+  validateMongoDbId(id);
+
+  try {
+    const blog = await Blog.findByIdAndDelete({ _id: id });
+
+    res.json(blog);
+  } catch (err) {
+    throw new Error(err);
+  }
+
+})
+
+module.exports = { createBlog, updateBlog, getBlog, getAllBlogs, deleteBlog };
