@@ -94,7 +94,6 @@ const getAllProducts = asyncHandler(async (req, res) => {
       const productCount = await Product.countDocuments();
       if(skip >= productCount) throw new Error('This Page does not exists.');
     }
-    console.log(page, limit, skip);
 
     const product = await query;            
     res.json(product);
@@ -136,7 +135,47 @@ const addToWishList = asyncHandler(async(req, res) => {
   } catch (err) {
     throw new Error(err);
   }
-}) 
+});
+
+const rating = asyncHandler(async(req, res) => {
+  const { _id } = req.user;
+  const { star, prodId } = req.body;
+
+  try {
+    const product = await Product.findById(prodId);
+    let alreadyRated = product.ratings.find(
+      (userId) => userId.postedBy.toString() === _id.toString()
+    );
+    if (alreadyRated) {
+      const updateRating = await Product.updateOne(
+        {
+          ratings: { $elemMatch: alreadyRated },
+        },
+        {
+          $set: { "ratings.$.star": star },
+        }, 
+        {
+          new: true,
+        }
+      );
+      res.json(updateRating);
+    } else {
+      const rateProduct = await Product.findByIdAndUpdate(prodId, {
+        $push: {
+          ratings: {
+            star,
+            postedBy: _id,
+          },
+        },
+      }, {
+        new: true,
+      });
+      res.json(rateProduct);
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+});
 
 module.exports = { 
   createProduct, 
@@ -145,4 +184,5 @@ module.exports = {
   updateProduct, 
   deleteProduct,
   addToWishList,
+  rating
 };
