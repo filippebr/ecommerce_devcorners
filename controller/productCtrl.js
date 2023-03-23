@@ -137,43 +137,73 @@ const addToWishList = asyncHandler(async(req, res) => {
   }
 });
 
-const rating = asyncHandler(async(req, res) => {
+// const rating = asyncHandler(async(req, res) => {
+//   const { _id } = req.user;
+//   const { star, prodId } = req.body;
+
+//   try {
+//     const product = await Product.findById(prodId);
+//     let alreadyRated = product.ratings.find(
+//       (userId) => userId.postedBy.toString() === _id.toString()
+//     );
+//     if (alreadyRated) {
+//       const updateRating = await Product.updateOne(
+//         {
+//           ratings: { $elemMatch: alreadyRated },
+//         },
+//         {
+//           $set: { "ratings.$.star": star },
+//         }, 
+//         {
+//           new: true,
+//         }
+//       );
+//       res.json(updateRating);
+//     } else {
+//       const rateProduct = await Product.findByIdAndUpdate(prodId, {
+//         $push: {
+//           ratings: {
+//             star,
+//             postedBy: _id,
+//           },
+//         },
+//       }, {
+//         new: true,
+//       });
+//       res.json(rateProduct);
+//     }
+//   } catch (err) {
+//     throw new Error(err);
+//   }
+// });
+
+const rating = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   const { star, prodId } = req.body;
 
   try {
     const product = await Product.findById(prodId);
-    let alreadyRated = product.ratings.find(
-      (userId) => userId.postedBy.toString() === _id.toString()
+
+    const ratingIndex = product.ratings.findIndex(
+      (rating) => rating.postedBy.toString() === _id.toString()
     );
-    if (alreadyRated) {
-      const updateRating = await Product.updateOne(
-        {
-          ratings: { $elemMatch: alreadyRated },
-        },
-        {
-          $set: { "ratings.$.star": star },
-        }, 
-        {
-          new: true,
-        }
-      );
-      res.json(updateRating);
+
+    if (ratingIndex > -1) {
+      // Update existing rating
+      product.ratings[ratingIndex].star = star;
+      await product.save();
+      res.json(product);
     } else {
-      const rateProduct = await Product.findByIdAndUpdate(prodId, {
-        $push: {
-          ratings: {
-            star,
-            postedBy: _id,
-          },
-        },
-      }, {
-        new: true,
+      // Create new rating
+      product.ratings.push({
+        star,
+        postedBy: _id,
       });
-      res.json(rateProduct);
+      await product.save();
+      res.json(product);
     }
-  } catch (err) {
-    throw new Error(err);
+  } catch (error) {
+    throw new Error(error);
   }
 });
 
