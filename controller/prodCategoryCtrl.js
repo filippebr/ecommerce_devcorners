@@ -51,9 +51,21 @@ const getProdCategory = asyncHandler(async(req, res) => {
   }
 });
 
+const getAllProdCategory = asyncHandler(async(req, res) => {
+
+  try {
+    const category = await ProdCategory.find();
+
+    res.json(category);
+  } catch(err) {
+    throw new Error(err);
+  }
+});
+
 module.exports = { 
   createProdCategory, 
   updateProdCategory, 
   deleteProdCategory, 
-  getProdCategory 
+  getProdCategory,
+  getAllProdCategory,
 };
