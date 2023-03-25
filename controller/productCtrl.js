@@ -128,108 +128,94 @@ const addToWishList = asyncHandler(async (req, res) => {
   }
 });
 
-// const addToWishList = asyncHandler(async(req, res) => {
+// const rating = asyncHandler(async (req, res) => {
 //   const { _id } = req.user;
-//   const { prodId } = req.body;
-
-//   try {
-//     const user = await User.findById(_id);
-//     const alreadyAdded = user.wishlist.find((id) => id.toString() === prodId);
-//     if (alreadyAdded) {
-//       let user = await User.findByIdAndUpdate(
-//         _id, 
-//         {
-//           $pull: { wishlist: prodId },
-//         }, 
-//         {
-//           new: true
-//         }
-//       );
-//       res.json(user);
-//     } else {
-//       let user = await User.findByIdAndUpdate(
-//         _id, 
-//         {
-//           $push: { wishlist: prodId },
-//         }, 
-//         {
-//           new: true
-//         }
-//       );
-//       res.json(user);
-//     }
-//   } catch (err) {
-//     throw new Error(err);
-//   }
-// });
-
-// const rating = asyncHandler(async(req, res) => {
-//   const { _id } = req.user;
-//   const { star, prodId } = req.body;
+//   const { star, prodId, comment } = req.body;
 
 //   try {
 //     const product = await Product.findById(prodId);
-//     let alreadyRated = product.ratings.find(
-//       (userId) => userId.postedBy.toString() === _id.toString()
+
+//     const ratingIndex = product.ratings.findIndex(
+//       (rating) => rating.postedBy.toString() === _id.toString()
 //     );
-//     if (alreadyRated) {
-//       const updateRating = await Product.updateOne(
-//         {
-//           ratings: { $elemMatch: alreadyRated },
-//         },
-//         {
-//           $set: { "ratings.$.star": star },
-//         }, 
-//         {
-//           new: true,
-//         }
-//       );
-//       res.json(updateRating);
+
+//     if (ratingIndex > -1) {
+//       // Update existing rating
+//       product.ratings[ratingIndex].star = star;
+//       if (comment !== undefined) { // Check if comment is defined before setting it
+//         product.comment[ratingIndex].comment = comment;
+//       }
+//       await product.save();
+      
 //     } else {
-//       const rateProduct = await Product.findByIdAndUpdate(prodId, {
-//         $push: {
-//           ratings: {
-//             star,
-//             postedBy: _id,
-//           },
-//         },
-//       }, {
-//         new: true,
+//       // Create new rating
+//       product.ratings.push({
+//         star,
+//         comment: comment || "",
+//         postedBy: _id,
 //       });
-//       res.json(rateProduct);
+//       await product.save();
+      
 //     }
-//   } catch (err) {
-//     throw new Error(err);
+//     const getAllRatings = await Product.findById(prodId);
+//     const totalRatings = getAllRatings.ratings.length;
+//     let ratingSum = getAllRatings.ratings
+//       .map((item) => item.star)
+//       .reduce((prev, current) => prev + current, 0);
+//     let actualRating = Math.round(ratingSum / totalRatings);
+//     let finalProduct = await Product.findByIdAndUpdate(
+//       prodId, 
+//       {
+//         totalRatings: actualRating,
+//       }, 
+//       {
+//         new: true,
+//       }
+//     );
+//     res.json(finalProduct);
+//   } catch (error) {
+//     throw new Error(error);
 //   }
 // });
 
 const rating = asyncHandler(async (req, res) => {
-  const { _id } = req.user;
-  const { star, prodId } = req.body;
+  const { _id: userId } = req.user;
+  const { star, prodId, comment } = req.body;
 
   try {
     const product = await Product.findById(prodId);
 
-    const ratingIndex = product.ratings.findIndex(
-      (rating) => rating.postedBy.toString() === _id.toString()
+    const userRatingIndex = product.ratings.findIndex(
+      (rating) => rating.postedBy.toString() === userId.toString()
     );
 
-    if (ratingIndex > -1) {
-      // Update existing rating
-      product.ratings[ratingIndex].star = star;
-      await product.save();
-      res.json(product);
+    if (userRatingIndex !== -1) {
+      // User has already rated this product, update their rating
+      product.ratings[userRatingIndex].star = star;
+      product.ratings[userRatingIndex].comment = comment;
     } else {
-      // Create new rating
+      // User has not yet rated this product, add a new rating
       product.ratings.push({
         star,
-        postedBy: _id,
+        comment,
+        postedBy: userId,
       });
-      await product.save();
-      res.json(product);
     }
-  } catch (error) {
-    throw new Error(error);
+
+    const totalRating = product.ratings.length;
+    const ratingSum = product.ratings.reduce(
+      (sum, rating) => sum + rating.star,
+      0
+    );
+    const actualRating = Math.round(ratingSum / totalRating);
+
+    product.totalRatings = actualRating;
+
+    const updatedProduct = await product.save();
+
+    res.json(updatedProduct);
+  } catch (err) {
+    throw new Error(err);
   }
 });
 
