@@ -126,56 +126,6 @@ const addToWishList = asyncHandler(async (req, res) => {
   }
 });
 
-// const rating = asyncHandler(async (req, res) => {
-//   const { _id } = req.user;
-//   const { star, prodId, comment } = req.body;
-
-//   try {
-//     const product = await Product.findById(prodId);
-
-//     const ratingIndex = product.ratings.findIndex(
-//       (rating) => rating.postedBy.toString() === _id.toString()
-//     );
-
-//     if (ratingIndex > -1) {
-//       // Update existing rating
-//       product.ratings[ratingIndex].star = star;
-//       if (comment !== undefined) { // Check if comment is defined before setting it
-//         product.comment[ratingIndex].comment = comment;
-//       }
-//       await product.save();
-      
-//     } else {
-//       // Create new rating
-//       product.ratings.push({
-//         star,
-//         comment: comment || "",
-//         postedBy: _id,
-//       });
-//       await product.save();
-      
-//     }
-//     const getAllRatings = await Product.findById(prodId);
-//     const totalRatings = getAllRatings.ratings.length;
-//     let ratingSum = getAllRatings.ratings
-//       .map((item) => item.star)
-//       .reduce((prev, current) => prev + current, 0);
-//     let actualRating = Math.round(ratingSum / totalRatings);
-//     let finalProduct = await Product.findByIdAndUpdate(
-//       prodId, 
-//       {
-//         totalRatings: actualRating,
-//       }, 
-//       {
-//         new: true,
-//       }
-//     );
-//     res.json(finalProduct);
-//   } catch (error) {
-//     throw new Error(error);
-//   }
-// });
-
 const rating = asyncHandler(async (req, res) => {
   const { _id: userId } = req.user;
   const { star, prodId, comment } = req.body;
@@ -217,6 +167,10 @@ const rating = asyncHandler(async (req, res) => {
   }
 });
 
+const uploadImages = asyncHandler(async(req, res) => {
+  console.log(req.files);
+});
+
 module.exports = { 
   createProduct, 
   getProduct, 
@@ -224,5 +178,6 @@ module.exports = {
   updateProduct, 
   deleteProduct,
   addToWishList,
-  rating
+  rating,
+  uploadImages,
 };
