@@ -1,4 +1,5 @@
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('cloudinary');
+
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.CLOUD_KEY,
@@ -8,7 +9,8 @@ cloudinary.config({
 const cloudinaryUploadImg = async(fileToUploads) => {
   return new Promise((resolve) => {
     cloudinary.uploader.upload(fileToUploads, (result) => {
-      resolve({
+      resolve(
+        {
           url: result.secure_url,
         }, 
         {
