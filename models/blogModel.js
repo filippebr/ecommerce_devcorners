@@ -44,7 +44,8 @@ const blogSchema = new mongoose.Schema({
   author: {
     type: String,
     default: "Admin",
-  }
+  },
+  images: [],
 }, {
   toJSON: {
     virtuals: true,

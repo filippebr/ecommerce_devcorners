@@ -28,30 +28,25 @@ const uploadPhoto = multer({
   limits: { fieldSize: 2000000 },
 });
 
-const productImgResize = async(req, res, next) => {
-  if(!req.files) return next();
-    await Promise.all(req.files.map( async(file) => {
-      await sharp(file.path)
-        .resize(300, 300)
-        .toFormat('jpeg')
-        .jpeg({quality: 90})
-        .toFile(`public/images/products/${file.filename}`);
-    })
-  );
+const imgResize = async (req, res, next, destinationPath) => {
+  if (!req.files) return next();
+  await Promise.all(req.files.map(async (file) => {
+    await sharp(file.path)
+      .rotate()
+      .resize(300, 300)
+      .toFormat('jpeg')
+      .jpeg({ quality: 90 })
+      .toFile(`public/images/${destinationPath}/${file.filename}`);
+  }));
   next();
 };
 
-const blogImgResize = async(req, res, next) => {
-  if(!req.files) return next();
-    await Promise.all(req.files.map( async(file) => {
-      await sharp(file.path)
-        .resize(300, 300)
-        .toFormat('jpeg')
-        .jpeg({quality: 90})
-        .toFile(`public/images/blogs/${file.filename}`);
-    })
-  );
-  next();
+const productImgResize = async (req, res, next) => {
+  await imgResize(req, res, next, 'products');
+};
+
+const blogImgResize = async (req, res, next) => {
+  await imgResize(req, res, next, 'blogs');
 };
 
 module.exports = { uploadPhoto, productImgResize, blogImgResize };

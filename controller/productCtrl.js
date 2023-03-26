@@ -4,6 +4,9 @@ const asyncHandler = require('express-async-handler');
 const slugify = require('slugify');
 const validateMongoDbId = require('../utils/validateMongoDbId');
 const cloudinaryUploadImg = require('../utils/cloudinary');
+const fs = require('fs');
+const util = require('util');
+const unlink = util.promisify(fs.unlink);
 
 const createProduct = asyncHandler(async (req, res) => {
   try {
@@ -169,30 +172,80 @@ const rating = asyncHandler(async (req, res) => {
   }
 });
 
-const uploadImages = asyncHandler(async(req, res) => {
+// const uploadProdImages = asyncHandler(async(req, res) => {
+//   const { id } = req.params;
+//   validateMongoDbId(id);
+//   try {
+//     const uploader = (path) => cloudinaryUploadImg(path, 'images');
+//     const urls = [];
+//     const files = req.files;
+//     for (const file of files) {
+//       const { path } = file;
+//       const newPath = await uploader(path);
+//       urls.push(newPath);
+//     }
+//     const findProduct = await Product.findByIdAndUpdate(id, {
+//         images: urls.map(file => { 
+//           return file; 
+//         }),
+//       }, 
+//       {
+//         new: true
+//       }
+//     );
+//     res.json(findProduct);
+//   } catch (err) {
+//     throw new Error(err);
+//   }
+// });
+
+// const uploadProdImages = asyncHandler(async(req, res) => {
+//   const { id } = req.params;
+//   validateMongoDbId(id);
+//   try {
+//     const uploader = (path) => cloudinaryUploadImg(path, 'images');
+//     const urls = await Promise.all(req.files.map(async (file) => {
+//       const { path } = file;
+//       const newPath = await uploader(path);
+//       await fs.promises.unlink(path);
+//       return newPath;
+//     }));
+//     const findProduct = await Product.findByIdAndUpdate(id, {
+//         images: urls,
+//       }, 
+//       {
+//         new: true
+//       }
+//     );
+//     res.json(findProduct);
+//   } catch (err) {
+//     throw new Error(err);
+//   }
+// });
+
+const uploadProdImages = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
+
   try {
-    const uploader = (path) => cloudinaryUploadImg(path, 'images');
-    const urls = [];
-    const files = req.files;
-    for (const file of files) {
-      const { path } = file;
-      const newPath = await uploader(path);
-      urls.push(newPath);
-    }
-    const findProduct = await Product.findByIdAndUpdate(id, {
-        images: urls.map(file => { 
-          return file; 
-        }),
-      }, 
-      {
-        new: true
-      }
+    const { files } = req;
+    const urls = await Promise.all(
+      files.map(async ({ path }) => {
+        const newPath = await cloudinaryUploadImg(path, 'images');
+       
+        // fs.unlinkSync(path);       
+        return newPath;
+      })
+    );
+
+    const findProduct = await Product.findByIdAndUpdate(
+      id,
+      { images: urls },
+      { new: true }
     );
     res.json(findProduct);
-  } catch (err) {
-    throw new Error(err);
+  } catch (error) {
+    throw new Error(error);
   }
 });
 
@@ -204,5 +257,5 @@ module.exports = {
   deleteProduct,
   addToWishList,
   rating,
-  uploadImages,
+  uploadProdImages,
 };
