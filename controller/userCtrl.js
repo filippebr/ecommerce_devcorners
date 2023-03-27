@@ -27,13 +27,7 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
   const findUser = await User.findOne({ email });
   if (findUser && await findUser.isPasswordMatched(password)) {
     const refreshToken = generateRefreshToken(findUser?._id);
-    const updateUser = await User.findByIdAndUpdate(
-      findUser.id, 
-      {
-        refreshToken,
-      }, 
-      { new: true }
-    );
+
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       maxAge: 72 * 60 * 60 * 1000,
@@ -50,6 +44,8 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
     res.status(409).json({ message: 'Invalid Credentials' })
   }
 });
+
+// 
 
 // handle refresh token
 const handleRefreshToken = asyncHandler(async(req, res) => {
