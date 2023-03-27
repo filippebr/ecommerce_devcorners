@@ -232,8 +232,8 @@ const uploadProdImages = asyncHandler(async (req, res) => {
     const urls = await Promise.all(
       files.map(async ({ path }) => {
         const newPath = await cloudinaryUploadImg(path, 'images');
-       
-        // fs.unlinkSync(path);       
+        // not working well with webp images, cannot remove image when the server is on 
+        fs.unlinkSync(path);       
         return newPath;
       })
     );
@@ -248,6 +248,37 @@ const uploadProdImages = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
+
+// const uploadProdImages = asyncHandler(async(req, res) => {
+//   const { id } = req.params;
+//   validateMongoDbId(id);
+
+//   try {
+//     const uploader = (path) => cloudinaryUploadImg(path, 'images');
+//     const urls = [];
+//     const files = req.files;
+//     for (const file of files) {
+//       const { path } = file;
+//       const newPath = await uploader(path);
+//       urls.push(newPath);
+//       // fs.unlinkSync(path);
+//     }
+//     const findProduct = await Product.findByIdAndUpdate(
+//       id,
+//       {
+//         images: urls.map((file) => {
+//           return file;
+//         }),
+//       },
+//       {
+//         new: true
+//       }
+//     );
+//     res.json(findProduct);
+//   } catch (err) {
+//     throw new Error(err);
+//   }
+// })
 
 module.exports = { 
   createProduct, 

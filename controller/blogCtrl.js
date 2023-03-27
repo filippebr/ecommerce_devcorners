@@ -174,31 +174,29 @@ const dislikeBlog = asyncHandler(async(req, res) => {
   }
 });
 
-const uploadBlogImages = asyncHandler(async(req, res) => {
+const uploadBlogImages = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  validateMongoDbId(id);
+  validateMongoDbId(id); 
+
   try {
-    const uploader = (path) => cloudinaryUploadImg(path, 'images');
-    const urls = [];
-    const files = req.files;
-    for (const file of files) {
-      const { path } = file;
-      const newPath = await uploader(path);
-      urls.push(newPath);
-      await unlink(path);
-    }
-    const findBlog = await Blog.findByIdAndUpdate(id, {
-        images: urls.map(file => { 
-          return file; 
-        }),
-      }, 
-      {
-        new: true
-      }
+    const { files } = req;
+    const urls = await Promise.all(
+      files.map(async ({ path }) => {
+        const newPath = await cloudinaryUploadImg(path, 'images');
+        // not working very well with webp images, cannot remove image when the server is on 
+        fs.unlinkSync(path);       
+        return newPath;
+      })
+    );
+
+    const findBlog = await Blog.findByIdAndUpdate(
+      id,
+      { images: urls },
+      { new: true }
     );
     res.json(findBlog);
-  } catch (err) {
-    throw new Error(err);
+  } catch (error) {
+    throw new Error(error);
   }
 });
 
