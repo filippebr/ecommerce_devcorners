@@ -2,6 +2,8 @@ const User = require('../models/userModel');
 const Product = require('../models/productModel');
 const Cart = require('../models/cartModel');
 const Coupon = require('../models/couponModel');
+const Order = require('../models/orderModel');
+const uniqid = require('uniqid');
 
 const asyncHandler = require('express-async-handler');
 const { generateToken } = require('../config/jwtToken');
@@ -353,7 +355,7 @@ const userCart = asyncHandler(async(req, res, next) => {
     // check if user already have product in cart
     const alreadyExistCart = await Cart.findOne({ orderBy: user._id });
     if (alreadyExistCart) {
-      alreadyExistCart.remove();
+      await Cart.findByIdAndDelete(alreadyExistCart._id);
     }
     for ( let i = 0; i < cart.length; i++ ) {
       let object = {};
@@ -430,6 +432,34 @@ const applyCoupon = asyncHandler(async(req, res) => {
   );
   res.json(totalAfterDiscount);
 });
+
+const createOrder = asyncHandler(async(req, res) => {
+  const { COD, couponApplied } = req.body;
+  const { _id } = req.user;
+  validateMongoDbId(_id);
+
+  try {
+    if ( !COD ) throw new Error('Create cash order failed');
+    const user = await User.findById(_id);  
+    let userCart = await Cart.findOne({ orderBy: user._id });
+    let finalAmount = 0;
+    if ( couponApplied && userCart.totalAfterDiscount ) {
+      finalAmount = userCart.totalAfterDiscount * 100;
+    } else {
+      finalAmount = userCart.cartTotal * 100;
+    }
+
+    let newOrder = await new Order({
+      products: userCart.products,
+      paymentIntent: {
+        id: uniqid(),
+      }
+    })
+  } catch (err) {
+    throw new Error(err)
+  }
+                                              
+})
 
 module.exports = { 
   createUser, 
