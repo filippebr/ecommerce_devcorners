@@ -410,7 +410,7 @@ const emptyCart = asyncHandler(async(req, res) => {
 
 const applyCoupon = asyncHandler(async(req, res) => {
   const { coupon } = req.body;
-  const {_id} = req.user;
+  const { _id } = req.user;
   validateMongoDbId(_id);
 
   const validCoupon = await Coupon.findOne({ name: coupon });  
@@ -444,22 +444,39 @@ const createOrder = asyncHandler(async(req, res) => {
     let userCart = await Cart.findOne({ orderBy: user._id });
     let finalAmount = 0;
     if ( couponApplied && userCart.totalAfterDiscount ) {
-      finalAmount = userCart.totalAfterDiscount * 100;
+      finalAmount = userCart.totalAfterDiscount;
     } else {
-      finalAmount = userCart.cartTotal * 100;
+      finalAmount = userCart.cartTotal;
     }
 
     let newOrder = await new Order({
       products: userCart.products,
       paymentIntent: {
         id: uniqid(),
-      }
-    })
+        method: "COD",
+        amount: finalAmount,
+        status: "Cash on Delivery",
+        created: Date.now(),
+        currency: "usd",
+      },
+      orderBy: user._id,
+      orderStatus: "Cash on Delivery",
+    }).save();
+    let update = userCart.products.map((item) => {
+      return {
+        updateOne: {
+          filter: { _id: item.product._id },
+          update: { $inc: {quantity: -item.count, sold: +item.count }},
+        },
+      };
+    });
+    const updated = await Product.bulkWrite(update, {});
+    res.json({message: "success"});
   } catch (err) {
     throw new Error(err)
   }
                                               
-})
+});
 
 module.exports = { 
   createUser, 
@@ -481,5 +498,6 @@ module.exports = {
   userCart,
   getUserCart,
   emptyCart,
-  applyCoupon
+  applyCoupon,
+  createOrder
 }; 
