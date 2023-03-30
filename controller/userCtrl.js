@@ -27,7 +27,7 @@ const createUser = asyncHandler(async (req, res) => {
   }
 });
 
-const loginUserCtrl = asyncHandler(async (req, res) => {
+const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   // check if user exists or not
   const findUser = await User.findOne({ email });
@@ -59,15 +59,6 @@ const loginAdmin = asyncHandler(async (req, res) => {
   if (findAdmin.role !== 'admin') return res.status(401).json({ message: 'Invalid Credentials' });
   if (findAdmin && await findAdmin.isPasswordMatched(password)) {
     const refreshToken = generateRefreshToken(findAdmin?._id);
-    const updateUser = await User.findByIdAndUpdate(
-      findAdmin.id,
-      {
-        refreshToken,
-      }, 
-      {
-        new: true,
-      }
-    );
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -516,7 +507,7 @@ const updateOrderStatus = asyncHandler(async(req, res) => {
 
 module.exports = { 
   createUser, 
-  loginUserCtrl, 
+  loginUser, 
   getAllUsers, 
   getUser, 
   deleteUser, 

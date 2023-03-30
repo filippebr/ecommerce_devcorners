@@ -1,7 +1,7 @@
 const express = require('express');
 const { 
   createUser, 
-  loginUserCtrl, 
+  loginUser, 
   getAllUsers, 
   getUser, 
   deleteUser, 
@@ -38,7 +38,7 @@ router.put(
 router.put('/resetPassword/:token', resetPassword);  
 
 router.put('/password', authMiddleware, updatePassword);
-router.post('/login', loginUserCtrl);
+router.post('/login', loginUser);
 router.post('/adminLogin', loginAdmin);
 router.post('/cart', authMiddleware, userCart);
 router.post('/cart/applyCoupon', authMiddleware, applyCoupon);
