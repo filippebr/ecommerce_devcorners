@@ -66,7 +66,6 @@ const authenticateUser = async (email, password, role, res) => {
   });
 };
 
-
 // handle refresh token
 const handleRefreshToken = asyncHandler(async(req, res) => {
   const cookie = req.cookies;  
@@ -413,50 +412,124 @@ const applyCoupon = asyncHandler(async(req, res) => {
   res.json(totalAfterDiscount);
 });
 
-const createOrder = asyncHandler(async(req, res) => {
-  const { COD, couponApplied } = req.body;
+// const createOrder = asyncHandler(async(req, res) => {
+//   const { COD, couponApplied } = req.body;
+//   const { _id } = req.user;
+//   validateMongoDbId(_id);
+
+//   try {
+//     if ( !COD ) throw new Error('Create cash order failed');
+//     const user = await User.findById(_id);  
+//     let userCart = await Cart.findOne({ orderBy: user._id });
+//     let finalAmount = 0;
+//     if ( couponApplied && userCart.totalAfterDiscount ) {
+//       finalAmount = userCart.totalAfterDiscount;
+//     } else {
+//       finalAmount = userCart.cartTotal;
+//     }
+
+//     let newOrder = await new Order({
+//       products: userCart.products,
+//       paymentIntent: {
+//         id: uniqid(),
+//         method: "COD",
+//         amount: finalAmount,
+//         status: "Cash on Delivery",
+//         created: Date.now(),
+//         currency: "usd",
+//       },
+//       orderBy: user._id,
+//       orderStatus: "Cash on Delivery",
+//     }).save();
+//     let update = userCart.products.map((item) => {
+//       return {
+//         updateOne: {
+//           filter: { _id: item.product._id },
+//           update: { $inc: {quantity: -item.count, sold: +item.count }},
+//         },
+//       };
+//     });
+//     const updated = await Product.bulkWrite(update, {});
+//     res.json({message: "success"});
+//   } catch (err) {
+//     throw new Error(err)
+//   }
+                                              
+// });
+
+const createOrder = asyncHandler(async (req, res) => {
+  const { cashOnDelivery, couponApplied } = req.body;
   const { _id } = req.user;
+  console.log("userId: ", _id);
   validateMongoDbId(_id);
 
   try {
-    if ( !COD ) throw new Error('Create cash order failed');
-    const user = await User.findById(_id);  
-    let userCart = await Cart.findOne({ orderBy: user._id });
-    let finalAmount = 0;
-    if ( couponApplied && userCart.totalAfterDiscount ) {
-      finalAmount = userCart.totalAfterDiscount;
-    } else {
-      finalAmount = userCart.cartTotal;
+    if (!cashOnDelivery) {
+      throw new Error('Cash on delivery order creation failed');
     }
 
-    let newOrder = await new Order({
-      products: userCart.products,
-      paymentIntent: {
-        id: uniqid(),
-        method: "COD",
-        amount: finalAmount,
-        status: "Cash on Delivery",
-        created: Date.now(),
-        currency: "usd",
-      },
-      orderBy: user._id,
-      orderStatus: "Cash on Delivery",
-    }).save();
-    let update = userCart.products.map((item) => {
-      return {
-        updateOne: {
-          filter: { _id: item.product._id },
-          update: { $inc: {quantity: -item.count, sold: +item.count }},
-        },
-      };
-    });
-    const updated = await Product.bulkWrite(update, {});
-    res.json({message: "success"});
+    const user = await User.findById(_id);
+    const userCart = await getActualUserCart(user);
+    const finalAmount = calculateFinalOrderAmount(userCart, couponApplied);
+
+    const newOrder = await createNewOrder(userCart, user, finalAmount);
+    await updateProductQuantities(userCart);
+
+    console.log("newOrder: ", newOrder);
+
+    res.json({ message: 'Success' });
   } catch (err) {
-    throw new Error(err)
+    throw new Error(err);
   }
-                                              
 });
+
+async function getActualUserCart(user) {
+  const cart = await Cart.findOne({ orderBy: user._id });
+  if (!cart) {
+    throw new Error('User cart not found');
+  }
+  return cart;
+}
+
+function calculateFinalOrderAmount(cart, couponApplied) {
+  if (couponApplied && cart.totalAfterDiscount) {
+    return cart.totalAfterDiscount;
+  } else {
+    return cart.cartTotal;
+  }
+}
+
+async function createNewOrder(userCart, user, finalAmount) {
+  const newOrder = await new Order({
+    products: userCart.products,
+    paymentIntent: {
+      id: uniqid(),
+      method: 'COD',
+      amount: finalAmount,
+      status: 'Cash on Delivery',
+      created: Date.now(),
+      currency: 'usd',
+    },
+    orderBy: user._id,
+    orderStatus: 'Cash on Delivery',
+  }).save();
+
+  return newOrder;
+}
+
+async function updateProductQuantities(userCart) {
+  const updates = userCart.products.map((item) => {
+    return {
+      updateOne: {
+        filter: { _id: item.product._id },
+        update: { $inc: { quantity: -item.count, sold: +item.count } },
+      },
+    };
+  });
+
+  const updated = await Product.bulkWrite(updates, {});
+  console.log("updateProductQuantities: ", updated);
+}
 
 const getOrders = asyncHandler(async(req, res) => {
   const { _id } = req.user;
