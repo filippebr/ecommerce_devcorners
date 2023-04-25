@@ -171,57 +171,6 @@ const rating = asyncHandler(async (req, res) => {
   }
 });
 
-// const uploadProdImages = asyncHandler(async(req, res) => {
-//   const { id } = req.params;
-//   validateMongoDbId(id);
-//   try {
-//     const uploader = (path) => cloudinaryUploadImg(path, 'images');
-//     const urls = [];
-//     const files = req.files;
-//     for (const file of files) {
-//       const { path } = file;
-//       const newPath = await uploader(path);
-//       urls.push(newPath);
-//     }
-//     const findProduct = await Product.findByIdAndUpdate(id, {
-//         images: urls.map(file => { 
-//           return file; 
-//         }),
-//       }, 
-//       {
-//         new: true
-//       }
-//     );
-//     res.json(findProduct);
-//   } catch (err) {
-//     throw new Error(err);
-//   }
-// });
-
-// const uploadProdImages = asyncHandler(async(req, res) => {
-//   const { id } = req.params;
-//   validateMongoDbId(id);
-//   try {
-//     const uploader = (path) => cloudinaryUploadImg(path, 'images');
-//     const urls = await Promise.all(req.files.map(async (file) => {
-//       const { path } = file;
-//       const newPath = await uploader(path);
-//       await fs.promises.unlink(path);
-//       return newPath;
-//     }));
-//     const findProduct = await Product.findByIdAndUpdate(id, {
-//         images: urls,
-//       }, 
-//       {
-//         new: true
-//       }
-//     );
-//     res.json(findProduct);
-//   } catch (err) {
-//     throw new Error(err);
-//   }
-// });
-
 const uploadProdImages = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
@@ -247,37 +196,6 @@ const uploadProdImages = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
-
-// const uploadProdImages = asyncHandler(async(req, res) => {
-//   const { id } = req.params;
-//   validateMongoDbId(id);
-
-//   try {
-//     const uploader = (path) => cloudinaryUploadImg(path, 'images');
-//     const urls = [];
-//     const files = req.files;
-//     for (const file of files) {
-//       const { path } = file;
-//       const newPath = await uploader(path);
-//       urls.push(newPath);
-//       // fs.unlinkSync(path);
-//     }
-//     const findProduct = await Product.findByIdAndUpdate(
-//       id,
-//       {
-//         images: urls.map((file) => {
-//           return file;
-//         }),
-//       },
-//       {
-//         new: true
-//       }
-//     );
-//     res.json(findProduct);
-//   } catch (err) {
-//     throw new Error(err);
-//   }
-// })
 
 module.exports = { 
   createProduct, 
