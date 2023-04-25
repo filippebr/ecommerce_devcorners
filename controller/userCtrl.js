@@ -320,40 +320,32 @@ const getWishlist = asyncHandler(async(req, res) => {
 
 const userCart = asyncHandler(async(req, res, next) => {
   const { cart } = req.body;
-  const _id = req.user?._id;
+  const userId = req.user?._id;
   
-  if (!_id) {
+  if (!userId) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
-
-  validateMongoDbId(_id);
+  
+  validateMongoDbId(userId);
   
   try {
-    let products = []
-    const user = await User.findById(_id);
-    // check if user already have product in cart
-    const alreadyExistCart = await Cart.findOne({ orderBy: user._id });
-    if (alreadyExistCart) {
-      await Cart.findByIdAndDelete(alreadyExistCart._id);
-    }
-    for ( let i = 0; i < cart.length; i++ ) {
-      let object = {};
-      object.product = cart[i]._id;
-      object.count = cart[i].count;
-      object.color = cart[i].color;
-      let getPrice = await Product.findById(cart[i]._id).select('price').exec();
-      object.price = getPrice.price;
-      products.push(object);
-    }
-    let cartTotal = 0;
-    for ( let i = 0; i < products.length; i++ ) {
-      cartTotal += products[i].price * products[i].count;
-    }
-    let newCart = await new Cart({
+    const user = await User.findById(userId);
+    const existingCart = await Cart.findOneAndDelete({ orderBy: userId });
+  
+    const products = await Promise.all(cart.map(async (item) => {
+      const { _id, count, color } = item;
+      const { price } = await Product.findById(_id).select('price').exec();
+      return { product: _id, count, color, price };
+    }));
+  
+    const cartTotal = products.reduce((total, { price, count }) => total + price * count, 0);
+  
+    const newCart = await new Cart({
       products,
       cartTotal,
-      orderBy: user?._id,
+      orderBy: userId,
     }).save();
+  
     res.json(newCart);
   } catch (err) {
     throw new Error(err);
