@@ -126,7 +126,6 @@ const addToWishList = asyncHandler(async (req, res) => {
 
     res.json(updatedUser);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 });
