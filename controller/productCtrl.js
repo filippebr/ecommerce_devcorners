@@ -6,6 +6,7 @@ const validateMongoDbId = require('../utils/validateMongoDbId');
 const cloudinaryUploadImg = require('../utils/cloudinary');
 const fs = require('fs');
 const util = require('util');
+const unlink = util.promisify(fs.unlink);
 
 const createProduct = asyncHandler(async (req, res) => {
   try {
@@ -68,10 +69,8 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
-    console.log('queryStr: ', queryStr);
 
     let query = Product.find(JSON.parse(queryStr));
-    // console.log('query: ', query);
     // Sorting
     if(req.query.sort) {
       const sortBy = req.query.sort.split(',').join('');
