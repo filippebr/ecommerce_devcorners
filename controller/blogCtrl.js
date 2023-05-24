@@ -182,7 +182,7 @@ const uploadBlogImages = asyncHandler(async (req, res) => {
     const { files } = req;
     const urls = await Promise.all(
       files.map(async ({ path }) => {
-        const newPath = await cloudinaryUploadImg(path, 'images');
+        const newPath = await cloudinaryUploadImg(path);
         // not working very well with webp images, cannot remove image when the server is on 
         fs.unlinkSync(path);       
         return newPath;
