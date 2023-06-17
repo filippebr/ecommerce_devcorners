@@ -187,12 +187,13 @@ const uploadProdImages = asyncHandler(async (req, res) => {
       })
     );
 
-    const findProduct = await Product.findByIdAndUpdate(
-      id,
-      { images: urls },
-      { new: true }
-    );
-    res.json(findProduct);
+    // const findProduct = await Product.findByIdAndUpdate(
+    //   id,
+    //   { images: urls },
+    //   { new: true }
+    // );
+    // res.json(findProduct);
+    res.json({url: urls})
   } catch (error) {
     throw new Error(error);
   }
