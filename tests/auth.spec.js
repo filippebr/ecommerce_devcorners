@@ -8,13 +8,13 @@ import app from '../index'
 describe("Authentication tests", () => {
   test("user registration", async () => {
     const response = await supertest(app).post(`/api/user/users`).send({
-      "firstname": "joao",
+      "firstname": "daniel",
       "lastname": "silva",
-      "email": "joão@hotmail.com",
-      "mobile": "0011223300",
-      "password": "123450"
+      "email": "daniel@hotmail.com",
+      "mobile": "0011223311",
+      "password": "123459"
     });
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(201);
   })
 })
