@@ -33,6 +33,6 @@ app.use(notFound);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`Server is running PORT ${PORT}`);
+  console.log(`App is running at http://localhost:${PORT}`)
 });
 
