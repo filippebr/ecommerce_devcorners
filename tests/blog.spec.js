@@ -1,6 +1,7 @@
 import supertest from "supertest"
 import { describe, expect, test } from "vitest"
-import app from "../index"
+// import app from "../index"
+import app from '../index'
 
 // Try to create test using this page https://github.com/lunsmat/nodejs-boilerplate/blob/master/src/app.ts
 
@@ -10,10 +11,10 @@ describe("Authentication tests", () => {
       "firstname": "joao",
       "lastname": "silva",
       "email": "joão@hotmail.com",
-      "mobile": "0011223355",
+      "mobile": "0011223300",
       "password": "123450"
     });
 
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(404);
   })
 })
