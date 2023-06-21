@@ -36,9 +36,12 @@ app.use('/api/coupon', couponRouter);
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`App is running at http://localhost:${PORT}`)
-});
+if (['development', 'production'].includes(process.env.MODE)) {
+  const PORT = process.env.PORT || 4000;
+  app.listen(PORT, () => console.log(`App is running at http://localhost:${PORT}`));
+} else {
+  console.log('Server not started (test mode)')
+}
 
 module.exports = app
 
