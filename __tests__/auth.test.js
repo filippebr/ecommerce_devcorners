@@ -16,30 +16,17 @@ const mockResponse = () => {
 }
 
 const mockUser = {
-  firstname: "robert",
-  lastname: "silva",
-  email: "robert@hotmail.com",
-  mobile: "0011223311",
-  password: "12345"  
+  "firstname": "dennis",
+  "lastname": "silva",
+  "email": "dennis@hotmail.com",
+  "mobile": "0011223318",
+  "password": "12345"  
 }
 
 describe("Authentication tests", () => {
   test("user registration", async () => {
-    // const response = await request(app).post(`/api/user/register`).send({
-    //   "firstname": "daniel",
-    //   "lastname": "silva",
-    //   "email": "daniel@hotmail.com",
-    //   "mobile": "0011223311",
-    //   "password": "123459"
-    // });
 
-    const response = await request(app).post("/api/user/register").send({
-      "firstname": "silveira",
-      "lastname": "silva",
-      "email": "silveira@hotmail.com",
-      "mobile": "0011223316",
-      "password": "123459"
-    })
+    const response = await request(app).post("/api/user/register").send(mockUser)
     expect(response.statusCode).toBe(200)
 
     // expect(response.status).toBe(201);
