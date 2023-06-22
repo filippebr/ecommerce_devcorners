@@ -34,10 +34,10 @@ describe("Authentication tests", () => {
     // });
 
     const response = await request(app).post("/api/user/register").send({
-      "firstname": "emanuel",
+      "firstname": "silveira",
       "lastname": "silva",
-      "email": "emanuel@hotmail.com",
-      "mobile": "0011223312",
+      "email": "silveira@hotmail.com",
+      "mobile": "0011223316",
       "password": "123459"
     })
     expect(response.statusCode).toBe(200)
