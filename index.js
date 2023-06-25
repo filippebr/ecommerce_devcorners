@@ -3,7 +3,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 
-// const { errorHandler, notFound } = require('./middlewares/errorHandler');
+const { errorHandler, notFound } = require('./middlewares/errorHandler');
 
 const app = express();
 const dotenv = require('dotenv').config();
@@ -33,8 +33,8 @@ app.use('/api/blogCategory', blogCategoryRouter);
 app.use('/api/brand', brandRouter);
 app.use('/api/coupon', couponRouter);
 
-// app.use(notFound);
-// app.use(errorHandler);
+app.use(notFound);
+app.use(errorHandler);
 
 app.post('/users', (req, res) => {
   res.sendStatus(200)

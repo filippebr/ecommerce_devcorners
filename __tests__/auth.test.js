@@ -16,10 +16,10 @@ const mockResponse = () => {
 }
 
 const mockUser = {
-  "firstname": "dennis",
+  "firstname": "silvana",
   "lastname": "silva",
-  "email": "dennis@hotmail.com",
-  "mobile": "0011223318",
+  "email": "silvana@hotmail.com",
+  "mobile": "0011223324",
   "password": "12345"  
 }
 
