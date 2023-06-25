@@ -16,10 +16,10 @@ const mockResponse = () => {
 }
 
 const mockUser = {
-  "firstname": "silvana",
+  "firstname": "laurie",
   "lastname": "silva",
-  "email": "silvana@hotmail.com",
-  "mobile": "0011223324",
+  "email": "laurie@hotmail.com",
+  "mobile": "0011223325",
   "password": "12345"  
 }
 
@@ -28,6 +28,7 @@ describe("Authentication tests", () => {
 
     const response = await request(app).post("/api/user/register").send(mockUser)
     expect(response.statusCode).toBe(200)
+    expect(response.headers['content-type']).toEqual(expect.stringContaining('json'))
 
     // expect(response.status).toBe(201);
   })
