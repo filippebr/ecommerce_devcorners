@@ -20,8 +20,8 @@ class UserService {
     }
 
     generateToken(user) {
-        const token = jwt.sign({ id: user.id }, process.env.APP_SECRET, {
-            expiresIn: '7d',
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+            expiresIn: '1d',
         });
 
         return token;
