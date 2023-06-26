@@ -24,6 +24,12 @@ const mockUser = {
 }
 
 describe("Authentication tests", () => {
+  // const userService = new userService.findByEmail('john.doe@example.com')
+
+  // beforeEach(async () => {
+  //   const user = await request(app)
+  // }) 
+
   test("user registration", async () => {
 
     const response = await request(app).post("/api/user/register").send(mockUser)

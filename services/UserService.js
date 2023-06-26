@@ -8,7 +8,7 @@ class UserService {
     async create(name, email, password) {
         const hash = await bcrypt.hash(password, 8);
 
-        const user = await mongoose.users.create({
+        const user = await User.create({
             data: {
                 name,
                 email,
@@ -28,11 +28,7 @@ class UserService {
     }
 
     async findByEmail(email) {
-        const user = await prisma.users.findUnique({
-            where: {
-                email,
-            },
-        });
+        const user = await User.findOne({ email });
 
         return user;
     }
