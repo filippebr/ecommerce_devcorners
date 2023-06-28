@@ -30,8 +30,10 @@ describe("Authentication tests", () => {
   beforeEach(async () => {
     const user = await userService.findByEmail('joe@hotmail.com')
 
+    console.log("user: ", user._id.toString())
+
     if (user) {
-      await User.findByIdAndDelete({id: user.id})
+      await User.findByIdAndDelete(user._id.toString())
     }
   }) 
 
