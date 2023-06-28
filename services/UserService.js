@@ -5,13 +5,15 @@ import jwt from 'jsonwebtoken'
 const mongoose = require('mongoose')
 
 class UserService {
-    async create(name, email, password) {
+    async create(firstname, lastname, email, mobile, password) {
         const hash = await bcrypt.hash(password, 8);
 
         const user = await User.create({
             data: {
-                name,
+                firstname,
+                lastname,
                 email,
+                mobile,
                 password: hash,
             },
         });
