@@ -1,6 +1,7 @@
 import request from 'supertest'
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { afterAll, beforeEach, describe, expect, test, vi } from "vitest"
 import UserService from '../services/UserService'
+const { default: mongoose } = require("mongoose");
 
 import app from '../index'
 const User = require('../models/userModel')
@@ -30,12 +31,17 @@ describe("Authentication tests", () => {
   beforeEach(async () => {
     const user = await userService.findByEmail('joe@hotmail.com')
 
-    console.log("user: ", user._id.toString())
+    console.log("userId: ", user._id.toString())
+    console.log("user: ", user)
 
     if (user) {
       await User.findByIdAndDelete(user._id.toString())
     }
   }) 
+
+  afterAll(async () => {
+    await mongoose.disconnect()
+  })
 
   test("user registration", async () => {
 

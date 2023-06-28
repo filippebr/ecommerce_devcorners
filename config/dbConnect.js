@@ -3,7 +3,7 @@ const URL = process.env.MONGODB_URL;
 
 const dbConnect = () => {
   try {
-    const conn = mongoose.connect(URL);
+    const conn = mongoose.connect(URL);    
     console.log("Mongodb connected");
   } catch (err) {
     console.log("Database error");
