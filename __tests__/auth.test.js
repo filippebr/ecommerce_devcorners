@@ -1,8 +1,9 @@
 import request from 'supertest'
-import { describe, expect, test, vi } from "vitest"
-import app from '../index'
+import { beforeEach, describe, expect, test, vi } from "vitest"
+import UserService from '../services/UserService'
 
-// Try to create test using this page https://github.com/lunsmat/nodejs-boilerplate/blob/master/src/app.ts
+import app from '../index'
+const User = require('../models/userModel')
 
 vi.mock("../config/jwtToken", () => ({
   generateToken: vi.fn(() => "jwt_token")
@@ -24,11 +25,15 @@ const mockUser = {
 }
 
 describe("Authentication tests", () => {
-  // const userService = new userService.findByEmail('john.doe@example.com')
+  const userService = new UserService();
 
-  // beforeEach(async () => {
-  //   const user = await request(app)
-  // }) 
+  beforeEach(async () => {
+    const user = await userService.findByEmail('joe@hotmail.com')
+
+    if (user) {
+      await User.findByIdAndDelete({id: user.id})
+    }
+  }) 
 
   test("user registration", async () => {
 
@@ -42,7 +47,5 @@ describe("Authentication tests", () => {
     expect(response.request._data).toHaveProperty('mobile')
     expect(response.request._data).toHaveProperty('password')
     expect(response.headers['content-type']).toEqual(expect.stringContaining('json'))
-
-    // expect(response.status).toBe(201);
   })
 })
