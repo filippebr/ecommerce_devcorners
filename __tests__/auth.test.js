@@ -1,6 +1,5 @@
 import request from 'supertest'
 import { afterAll, beforeEach, describe, expect, test, vi } from "vitest"
-import UserService from '../services/UserService'
 const { default: mongoose } = require("mongoose");
 
 import app from '../index'
@@ -26,10 +25,10 @@ const mockUser = {
 }
 
 describe("Authentication tests", () => {
-  const userService = new UserService();
+  // const userService = new UserService();
 
   beforeEach(async () => {
-    const user = await userService.findByEmail('joe@hotmail.com')
+    const user = await User.findOne({email: 'joe@hotmail.com'})
 
     // console.log("userId: ", user._id.toString())
     console.log("user: ", user);
@@ -67,6 +66,8 @@ describe("Authentication tests", () => {
   //       "password": ""
   //     }
   //   );
+
+  //   console.log("response: ", response.request._data)
 
   //   expect(response.statusCode).toBe(409);
   //   expect(response.request._data).toBe(null);
