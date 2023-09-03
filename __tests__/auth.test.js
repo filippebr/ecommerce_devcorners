@@ -30,9 +30,6 @@ describe("Authentication tests", () => {
   beforeEach(async () => {
     const user = await User.findOne({email: 'joe@hotmail.com'})
 
-    // console.log("userId: ", user._id.toString())
-    console.log("user: ", user);
-
     if (user) {
       await User.findByIdAndDelete(user._id.toString())
     }
@@ -56,23 +53,25 @@ describe("Authentication tests", () => {
     expect(response.headers['content-type']).toEqual(expect.stringContaining('json'))
   })
 
-  // test('should not register a new user with invalid data', async () => {
-  //   const response = await request(app).post('/api/user/register').send(
-  //     { 
-  //       "firstname": "", 
-  //       "lastname": "", 
-  //       "email": "not a valid email", 
-  //       "mobile": "not a valid mobile", 
-  //       "password": ""
-  //     }
-  //   );
+  test('should not register a new user with invalid data', async () => {
+    const response = await request(app).post('/api/user/register').send(
+      { 
+        "firstname": "", 
+        "lastname": "", 
+        "email": "not a valid email", 
+        "mobile": "not a valid mobile", 
+        "password": ""
+      }
+    );
 
-  //   console.log("response: ", response.request._data)
+    const res = JSON.parse(response.res.text);
 
-  //   expect(response.statusCode).toBe(409);
-  //   expect(response.request._data).toBe(null);
-  //   expect(response.request._data).toHaveProperty('message');
-  //   expect(response.request._data.message).toEqual('User already exists');
-  // });
+    console.log("response.request._data: ", response.request._data);
+
+    expect(response.statusCode).toBe(500);
+    // expect(response.request._data).toBe(null);
+    expect(res).toHaveProperty('message');
+    // expect(message).toEqual('User already exists');
+  });
   
 })
